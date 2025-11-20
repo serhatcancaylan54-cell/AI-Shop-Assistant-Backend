@@ -7,14 +7,12 @@ const app = express();
 app.use(express.json());
 
 // CORS
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST"],
-  })
-);
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST"]
+}));
 
-// GOOGLE SERVICE ACCOUNT (ENV’den al)
+// Firebase
 const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
 
 if (!admin.apps.length) {
@@ -25,36 +23,28 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
-// ---------------------------
-// AI ENDPOINT (WORKS ON VERCEL)
-// ---------------------------
+// TEST API ROUTE
+app.get("/api/test", (req, res) => {
+  res.json({ success: true, message: "Backend çalışıyor!" });
+});
+
+// AI ROUTE
 app.post("/api/ai", async (req, res) => {
   try {
-    const { prompt, storeId } = req.body;
+    const { prompt } = req.body;
 
-    if (!prompt) {
-      return res.status(400).json({
-        success: false,
-        error: "Prompt zorunludur",
-      });
-    }
-
-    // Şimdilik test amaçlı
     return res.json({
       success: true,
-      reply: `AI cevabı → ${prompt}`,
+      reply: "AI çalışıyor. Mesaj: " + prompt,
     });
 
   } catch (err) {
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
-      error: "AI hatası",
-      details: err.message,
+      error: err.message
     });
   }
 });
 
-// --------------------------------
-// Vercel serverless export
-// --------------------------------
+// Vercel export
 module.exports = app;
